@@ -14,21 +14,21 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    position: relative; /* Necessário para posicionar os corações */
-    max-width: 800px; /* Largura máxima para o contêiner */
+    position: relative;
+    max-width: 800px; /* Largura máxima para o container em desktops */
     margin-left: auto;
-    margin-right: auto; /* Centraliza o contêiner */
+    margin-right: auto;
 }
 
 img {
-    max-width: 70%; /* Reduz a largura máxima para 70% do contêiner */
+    max-width: 80%; /* Reduz a largura máxima da imagem para 80% por padrão */
     height: auto;
     border-radius: 5px;
     margin-bottom: 20px;
     display: block;
     margin-left: auto;
     margin-right: auto;
-    /* max-height: 80vh; Opcional: mantém o limite de altura */
+    /* max-height: 70vh; Opcional: Limita a altura máxima da imagem */
 }
 
 #contador {
@@ -105,5 +105,79 @@ button#botaoCarta:hover {
     100% {
         transform: translateY(-100px) rotate(360deg);
         opacity: 0;
+    }
+}
+
+/* Estilos específicos para telas menores (celulares) */
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start; /* Alinha o conteúdo ao topo em telas menores */
+        padding-top: 20px; /* Adiciona um pouco de espaço no topo */
+    }
+
+    .container {
+        width: 95%; /* O container ocupa mais largura da tela do celular */
+        margin: 10px auto; /* Reduz as margens laterais */
+        padding: 20px; /* Reduz o padding interno */
+    }
+
+    img {
+        max-width: 90%; /* Aumenta um pouco a largura da imagem em celulares */
+        margin-bottom: 15px; /* Reduz a margem inferior da imagem */
+    }
+
+    #contador p {
+        font-size: 1em; /* Reduz o tamanho da fonte do título do contador */
+    }
+
+    #tempo {
+        font-size: 1.2em; /* Reduz o tamanho da fonte do tempo */
+    }
+
+    .mensagem {
+        font-size: 1.5em; /* Reduz o tamanho da fonte da mensagem */
+    }
+
+    button#botaoCarta {
+        font-size: 0.9em; /* Reduz o tamanho da fonte do botão */
+        padding: 8px 15px; /* Reduz o padding do botão */
+    }
+
+    .coracao {
+        font-size: 1em; /* Reduz o tamanho dos corações */
+    }
+}
+
+/* Estilos para tablets (opcional) */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .container {
+        width: 80%;
+        padding: 25px;
+    }
+
+    img {
+        max-width: 90%;
+        margin-bottom: 18px;
+    }
+
+    #contador p {
+        font-size: 1.1em;
+    }
+
+    #tempo {
+        font-size: 1.4em;
+    }
+
+    .mensagem {
+        font-size: 1.8em;
+    }
+
+    button#botaoCarta {
+        font-size: 0.95em;
+        padding: 9px 18px;
+    }
+
+    .coracao {
+        font-size: 1.2em;
     }
 }
