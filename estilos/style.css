@@ -1,0 +1,102 @@
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative; 
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#contador {
+    margin-bottom: 20px;
+}
+
+#contador p {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#tempo {
+    font-size: 1.5em;
+    color: #e44d26; 
+}
+
+#tempo span {
+    font-weight: bold;
+}
+
+.mensagem {
+    font-size: 2em;
+    font-weight: bold;
+    color: #555; 
+    text-align: center; 
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: none; 
+    animation: none; 
+}
+
+.mensagem.animar-mensagem {
+    color: #e44d26; 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    border-right: .15em solid orange; 
+    animation:
+        typing 3s steps(30, end) infinite alternate,
+        blink-caret .75s step-end infinite alternate;
+}
+
+.coracao {
+    position: absolute;
+    font-size: 1.5em;
+    color: red;
+    animation: flutuar 2s linear infinite;
+    opacity: 0; 
+}
+
+@keyframes flutuar {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+button#botaoCarta {
+    background-color: #e44d26;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button#botaoCarta:hover {
+    background-color: #c83e1e;
+}
