@@ -14,14 +14,21 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    position: relative; 
+    position: relative; /* Necessário para posicionar os corações */
+    max-width: 800px; /* Largura máxima para o contêiner */
+    margin-left: auto;
+    margin-right: auto; /* Centraliza o contêiner */
 }
 
 img {
-    max-width: 100%;
+    max-width: 70%; /* Reduz a largura máxima para 70% do contêiner */
     height: auto;
     border-radius: 5px;
     margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    /* max-height: 80vh; Opcional: mantém o limite de altura */
 }
 
 #contador {
@@ -36,7 +43,7 @@ img {
 
 #tempo {
     font-size: 1.5em;
-    color: #e44d26; 
+    color: #e44d26; /* Uma corzinha para destacar */
 }
 
 #tempo span {
@@ -46,43 +53,21 @@ img {
 .mensagem {
     font-size: 2em;
     font-weight: bold;
-    color: #555; 
-    text-align: center; 
+    color: #555; /* Cor padrão da contagem regressiva */
+    text-align: center; /* Centraliza o texto da contagem regressiva */
     white-space: nowrap;
     overflow: hidden;
-    border-right: none; 
-    animation: none; 
+    border-right: none; /* Remove o cursor padrão na contagem regressiva */
+    animation: none; /* Remove a animação por padrão */
 }
 
 .mensagem.animar-mensagem {
-    color: #e44d26; 
+    color: #e44d26; /* Cor da mensagem de feliz aniversário */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    border-right: .15em solid orange; 
+    border-right: .15em solid orange; /* Adiciona o cursor para a animação */
     animation:
         typing 3s steps(30, end) infinite alternate,
         blink-caret .75s step-end infinite alternate;
-}
-
-.coracao {
-    position: absolute;
-    font-size: 1.5em;
-    color: red;
-    animation: flutuar 2s linear infinite;
-    opacity: 0; 
-}
-
-@keyframes flutuar {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-100px) rotate(360deg);
-        opacity: 0;
-    }
 }
 
 button#botaoCarta {
@@ -99,4 +84,26 @@ button#botaoCarta {
 
 button#botaoCarta:hover {
     background-color: #c83e1e;
+}
+
+.coracao {
+    position: absolute;
+    font-size: 1.5em;
+    color: red;
+    animation: flutuar 2s linear infinite;
+    opacity: 0; /* Começam invisíveis */
+}
+
+@keyframes flutuar {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
 }
