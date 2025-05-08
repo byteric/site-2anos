@@ -44,12 +44,30 @@ function atualizarTempoJuntos(diferenca) {
     const minutos = Math.floor((diferenca / (1000 * 60)) % 60);
     const horas = Math.floor((diferenca / (1000 * 60 * 60)) % 24);
     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-    const meses = Math.floor(dias / 30.44);
-    const anos = Math.floor(meses / 12);
+    const meses = 0;
+    const anos = 0;
 
-    document.getElementById('anos').textContent = anos;
-    document.getElementById('meses').textContent = meses % 12;
-    document.getElementById('dias').textContent = Math.floor(dias % 30.44);
+    const dataInicio = new Date('2023-09-09T00:00:00');
+    const dataAtual = new Date();
+
+    let diffAnos = dataAtual.getFullYear() - dataInicio.getFullYear();
+    let diffMeses = dataAtual.getMonth() - dataInicio.getMonth();
+    let diffDias = dataAtual.getDate() - dataInicio.getDate();
+
+    if (diffDias < 0) {
+        diffMeses--;
+        const ultimoDiaMesAnterior = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 0).getDate();
+        diffDias = ultimoDiaMesAnterior + diffDias;
+    }
+
+    if (diffMeses < 0) {
+        diffAnos--;
+        diffMeses = 12 + diffMeses;
+    }
+
+    document.getElementById('anos').textContent = diffAnos;
+    document.getElementById('meses').textContent = diffMeses;
+    document.getElementById('dias').textContent = diffDias;
     document.getElementById('horas').textContent = horas;
     document.getElementById('minutos').textContent = minutos;
     document.getElementById('segundos').textContent = segundos;
