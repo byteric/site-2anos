@@ -1,58 +1,72 @@
 function atualizarContador() {
-    const dataInicio = new Date('2023-09-09T00:00:00'); // Data de INÍCIO do namoro
-    const dataDoisAnos = new Date('2025-09-09T00:00:00'); // Data de 2 anos de namoro
+    const dataInicioNamoro = new Date('2023-09-09T00:00:00');
+    const dataDoisAnosNamoro = new Date('2025-09-09T00:00:00');
+    const dataDiaDosNamorados = new Date('2025-06-12T00:00:00');
+    const dataUmAnoAlianca = new Date('2025-06-15T00:00:00');
     const dataAtual = new Date();
-    const diferencaInicio = dataAtual.getTime() - dataInicio.getTime();
-    const diferencaDoisAnos = dataDoisAnos.getTime() - dataAtual.getTime();
+
+    const diferencaInicioNamoro = dataAtual.getTime() - dataInicioNamoro.getTime();
+    const diferencaDoisAnosNamoro = dataDoisAnosNamoro.getTime() - dataAtual.getTime();
+    const diferencaDiaDosNamorados = dataDiaDosNamorados.getTime() - dataAtual.getTime();
+    const diferencaUmAnoAlianca = dataUmAnoAlianca.getTime() - dataAtual.getTime();
 
     const elementoMensagem = document.querySelector('.mensagem');
     const elementoContador = document.getElementById('contador');
-    const botaoCarta = document.getElementById('botaoCarta');
+    const botaoCartaPrincipal = document.getElementById('botaoCartaPrincipal');
+    const botaoCartaNamorados = document.getElementById('botaoCartaNamorados');
+    const botaoCartaAlianca = document.getElementById('botaoCartaAlianca');
+    const coracoes = document.querySelectorAll('.coracao');
 
-    botaoCarta.addEventListener('click', function() {
-        if (diferencaDoisAnos <= 0) {
-            // Já chegou ou passou dos 2 anos, abre a carta
+    botaoCartaPrincipal.onclick = function() {
+        if (diferencaDoisAnosNamoro <= 0) {
             window.open('carta.html', '_blank');
         } else {
-            // Ainda não chegou a data, mostra a mensagem
-            alert('Sua carta especial estará disponível no dia 09 de setembro de 2025! ❤️');
+            alert('Sua carta especial de 2 anos estará disponível no dia 09 de setembro de 2025! ❤️');
         }
-    });
+    };
 
-    if (diferencaDoisAnos <= 0) {
-        // Já chegou ou passou dos 2 anos
-        elementoMensagem.textContent = 'Feliz 2 anos, meu amor! ❤️';
-        elementoMensagem.classList.add('animar-mensagem'); // Adiciona classe para ativar a animação
-        const coracoes = document.querySelectorAll('.coracao');
-        coracoes.forEach(coracao => coracao.style.opacity = 1);
-        elementoContador.style.display = 'none'; // Oculta o contador
-        atualizarTempoJuntos(diferencaInicio); // Exibe o tempo total juntos
+    botaoCartaNamorados.onclick = function() {
+        if (diferencaDiaDosNamorados <= 0) {
+            window.open('carta_namorados.html', '_blank');
+        } else {
+            alert('A carta do Dia dos Namorados estará disponível no dia 12 de junho de 2025! 💖');
+        }
+    };
+
+    botaoCartaAlianca.onclick = function() {
+        if (diferencaUmAnoAlianca <= 0) {
+            window.open('carta_alianca.html', '_blank');
+        } else {
+            alert('A carta de 1 ano de aliança estará disponível no dia 15 de junho de 2025! 💍');
+        }
+    };
+
+    if (diferencaDoisAnosNamoro <= 0) {
+        elementoMensagem.textContent = 'Feliz 2 anos, meu amor! ✨';
+        elementoMensagem.classList.add('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 1;
+            coracao.innerHTML = '💖';
+        });
+        elementoContador.style.display = 'none';
     } else {
-        // Contagem regressiva para 2 anos
-        const dias = Math.ceil(diferencaDoisAnos / (1000 * 60 * 60 * 24));
-        elementoMensagem.textContent = `Contagem regressiva para 2 anos: ${dias} dias`;
-        elementoMensagem.classList.remove('animar-mensagem'); // Remove a classe de animação
-        const coracoes = document.querySelectorAll('.coracao');
-        coracoes.forEach(coracao => coracao.style.opacity = 0); // Oculta os corações
-        elementoContador.style.display = 'block'; // Mostra o contador
-        atualizarTempoJuntos(diferencaInicio); // Exibe o tempo total juntos até agora
+        const diasRestantesNamoro = Math.ceil(diferencaDoisAnosNamoro / (1000 * 60 * 60 * 24));
+        elementoMensagem.textContent = `Faltam ${diasRestantesNamoro} dias para 2 anos!`;
+        elementoMensagem.classList.remove('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 0;
+            coracao.innerHTML = '';
+        });
+        elementoContador.style.display = 'block';
     }
-}
 
-function atualizarTempoJuntos(diferenca) {
-    const segundos = Math.floor((diferenca / 1000) % 60);
-    const minutos = Math.floor((diferenca / (1000 * 60)) % 60);
-    const horas = Math.floor((diferenca / (1000 * 60 * 60)) % 24);
-    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-    const meses = 0;
-    const anos = 0;
+    const segundos = Math.floor((diferencaInicioNamoro / 1000) % 60);
+    const minutos = Math.floor((diferencaInicioNamoro / (1000 * 60)) % 60);
+    const horas = Math.floor((diferencaInicioNamoro / (1000 * 60 * 60)) % 24);
 
-    const dataInicio = new Date('2023-09-09T00:00:00');
-    const dataAtual = new Date();
-
-    let diffAnos = dataAtual.getFullYear() - dataInicio.getFullYear();
-    let diffMeses = dataAtual.getMonth() - dataInicio.getMonth();
-    let diffDias = dataAtual.getDate() - dataInicio.getDate();
+    let diffAnos = dataAtual.getFullYear() - dataInicioNamoro.getFullYear();
+    let diffMeses = dataAtual.getMonth() - dataInicioNamoro.getMonth();
+    let diffDias = dataAtual.getDate() - dataInicioNamoro.getDate();
 
     if (diffDias < 0) {
         diffMeses--;
@@ -73,8 +87,5 @@ function atualizarTempoJuntos(diferenca) {
     document.getElementById('segundos').textContent = segundos;
 }
 
-// Atualiza o contador a cada segundo
 setInterval(atualizarContador, 1000);
-
-// Chama a função uma vez para exibir o valor inicial imediatamente
 atualizarContador();
