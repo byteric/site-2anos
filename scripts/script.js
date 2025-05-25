@@ -1,19 +1,55 @@
 const UM_DIA_EM_MILISSEGUNDOS = 1000 * 60 * 60 * 24;
 const UM_MINUTO_EM_MILISSEGUNDOS = 1000 * 60;
 
+const firebaseConfig = {
+  apiKey: "AIzaSyA180nu5xjDqMAFFncUAVXCTs-7EIWosVQ", 
+  authDomain: "calendarioamor-b6c91.firebaseapp.com", 
+  projectId: "calendarioamor-b6c91", 
+  storageBucket: "calendarioamor-b6c91.applestorage.app", 
+  messagingSenderId: "719665412896", 
+  appId: "1:719665412896:web:f05bed79e5357fc40af545" 
+};
+
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(); 
+const colecaoEventos = db.collection('eventosAmorosos'); 
+
 let eventos = {};
 let dataAtualCalendario = new Date();
 let dataSelecionadaCalendario = new Date();
 
-function carregarEventos() {
-    const eventosSalvos = localStorage.getItem('eventosAmorSite');
-    if (eventosSalvos) {
-        eventos = JSON.parse(eventosSalvos);
+
+async function carregarEventos() {
+    try {
+        const snapshot = await colecaoEventos.get();
+        eventos = {}; 
+        snapshot.forEach(doc => {
+            const data = doc.id; 
+            eventos[data] = doc.data().eventosArray; 
+        });
+        gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
+        exibirEventosDoDia(dataSelecionadaCalendario);
+    } catch (error) {
+        console.error("Erro ao carregar eventos do Firestore:", error);
+        alert("Erro ao carregar eventos. Verifique sua conexão ou as regras do Firebase.");
     }
 }
 
-function salvarEventos() {
-    localStorage.setItem('eventosAmorSite', JSON.stringify(eventos));
+async function salvarEventos(data, eventosDoDia) {
+    const chaveData = formatarDataParaChave(data);
+    try {
+        if (eventosDoDia && eventosDoDia.length > 0) {
+            // Define o documento com o ID da data
+            await colecaoEventos.doc(chaveData).set({ eventosArray: eventosDoDia });
+        } else {
+            await colecaoEventos.doc(chaveData).delete();
+        }
+        console.log("Eventos salvos no Firestore para:", chaveData);
+    } catch (error) {
+        console.error("Erro ao salvar eventos no Firestore:", error);
+        alert("Erro ao salvar eventos. Tente novamente.");
+    }
 }
 
 function formatarDataParaChave(data) {
@@ -91,14 +127,12 @@ function exibirEventosDoDia(data) {
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'X';
             deleteButton.classList.add('delete-event');
-            deleteButton.onclick = () => {
+            deleteButton.onclick = async () => { 
                 eventos[chaveData].splice(index, 1);
                 if (eventos[chaveData].length === 0) {
                     delete eventos[chaveData];
-                    const diaDiv = document.querySelector(`.dia-calendario[data-date="${chaveData}"]`);
-                    if (diaDiv) diaDiv.classList.remove('has-event');
                 }
-                salvarEventos();
+                await salvarEventos(data, eventos[chaveData]); 
                 exibirEventosDoDia(data);
                 gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
             };
@@ -113,7 +147,7 @@ function exibirEventosDoDia(data) {
     }
 }
 
-function adicionarEvento() {
+async function adicionarEvento() { 
     const inputEvento = document.getElementById('inputEvento');
     const inputHora = document.getElementById('inputHoraEvento');
     const nomeEvento = inputEvento.value.trim();
@@ -130,7 +164,7 @@ function adicionarEvento() {
             hora: horaEvento
         });
 
-        salvarEventos();
+        await salvarEventos(dataSelecionadaCalendario, eventos[chaveData]); 
         exibirEventosDoDia(dataSelecionadaCalendario);
         inputEvento.value = '';
         inputHora.value = '';
@@ -144,7 +178,6 @@ function adicionarEvento() {
 
 function verificarNotificacoes() {
     const agora = new Date();
-    const hojeChave = formatarDataParaChave(agora);
     let notificacoesDisparadas = localStorage.getItem('notificacoesDisparadas') || '{}';
     notificacoesDisparadas = JSON.parse(notificacoesDisparadas);
 
@@ -195,8 +228,8 @@ function verificarNotificacoes() {
     localStorage.setItem('notificacoesDisparadas', JSON.stringify(notificacoesDisparadas));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    carregarEventos();
+document.addEventListener('DOMContentLoaded', async () => { 
+    await carregarEventos(); 
     verificarNotificacoes();
     atualizarContadorPrincipal();
 
