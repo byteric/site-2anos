@@ -178,34 +178,34 @@ button:hover {
 iframe {
     max-width: 100%;
     box-sizing: border-box;
-    margin-bottom: 15px; 
+    margin-bottom: 15px;
 }
-
 
 .modal {
     display: none; 
-    position: fixed; 
-    z-index: 100; 
+    position: fixed;
+    z-index: 100;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; 
-    background-color: rgba(0, 0, 0, 0.6); 
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex; 
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
     background-color: #fff;
-    margin: 5% auto; 
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     max-width: 90%;
-    width: 600px; /* Largura padrão */
+    width: 600px;
     position: relative;
     animation: slideIn 0.4s ease-out;
+    box-sizing: border-box; 
 }
 
 @keyframes slideIn {
@@ -256,13 +256,13 @@ iframe {
     font-size: 1.2em;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin: 0; 
-    box-shadow: none; 
+    margin: 0;
+    box-shadow: none;
 }
 
 .calendario-header button:hover {
     background: #e44d26;
-    transform: none; 
+    transform: none;
     box-shadow: none;
 }
 
@@ -296,7 +296,7 @@ iframe {
     transition: background-color 0.2s ease, transform 0.1s ease;
     font-size: 0.95em;
     color: #333;
-    position: relative; 
+    position: relative;
 }
 
 .dia-calendario:hover {
@@ -348,8 +348,8 @@ iframe {
 #listaEventos {
     list-style: none;
     padding: 0;
-    max-height: 150px; 
-    overflow-y: auto; 
+    max-height: 150px;
+    overflow-y: auto;
     margin-bottom: 15px;
 }
 
@@ -410,7 +410,6 @@ iframe {
     text-align: center;
     margin-top: 10px;
 }
-
 
 @media (max-width: 768px) {
     .container {
@@ -490,6 +489,16 @@ iframe {
     }
 
     #listaEventos li {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    #listaEventos li .delete-event {
+        padding: 4px 7px;
+    }
+
+    .eventos-section input[type="text"],
+    .eventos-section button#adicionarEvento {
         padding: 8px;
         font-size: 0.9em;
     }

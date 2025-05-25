@@ -85,11 +85,12 @@ function exibirEventosDoDia(data) {
                 eventos[chaveData].splice(index, 1);
                 if (eventos[chaveData].length === 0) {
                     delete eventos[chaveData];
-                    const diaDiv = document.querySelector(`.dia-calendario.selecionado`);
+                    const diaDiv = document.querySelector(`.dia-calendario[data-date="${chaveData}"]`); 
                     if (diaDiv) diaDiv.classList.remove('has-event');
                 }
                 salvarEventos();
                 exibirEventosDoDia(data);
+                gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth()); 
             };
             li.appendChild(deleteButton);
             listaEventos.appendChild(li);
@@ -194,10 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     botaoCalendario.onclick = function() {
         modalCalendario.style.display = 'flex';
+        dataAtualCalendario = new Date(); 
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        dataSelecionadaCalendario = new Date();
-        const hojeDiv = document.querySelector('.dia-calendario.hoje');
-        if (hojeDiv) hojeDiv.classList.add('selecionado');
+        dataSelecionadaCalendario = new Date(); 
+        const hojeDiv = document.querySelector(`.dia-calendario.hoje`);
+        if (hojeDiv) {
+            const diaAnteriorSelecionado = document.querySelector('.dia-calendario.selecionado');
+            if (diaAnteriorSelecionado) {
+                diaAnteriorSelecionado.classList.remove('selecionado');
+            }
+            hojeDiv.classList.add('selecionado');
+        }
         exibirEventosDoDia(dataSelecionadaCalendario);
     };
 
@@ -214,13 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
     prevMonthBtn.onclick = () => {
         dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() - 1);
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        exibirEventosDoDia(dataSelecionadaCalendario);
+        exibirEventosDoDia(dataSelecionadaCalendario); 
     };
 
     nextMonthBtn.onclick = () => {
         dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + 1);
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        exibirEventosDoDia(dataSelecionadaCalendario);
+        exibirEventosDoDia(dataSelecionadaCalendario); 
     };
 
     adicionarEventoBtn.onclick = adicionarEvento;
