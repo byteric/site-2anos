@@ -1,4 +1,5 @@
 const UM_DIA_EM_MILISSEGUNDOS = 1000 * 60 * 60 * 24;
+const UM_MINUTO_EM_MILISSEGUNDOS = 1000 * 60;
 
 let eventos = {};
 let dataAtualCalendario = new Date();
@@ -43,6 +44,8 @@ function gerarCalendario(ano, mes) {
         const dataAtualIteracao = new Date(ano, mes, dia);
         const chaveData = formatarDataParaChave(dataAtualIteracao);
 
+        diaDiv.setAttribute('data-date', chaveData);
+
         if (eventos[chaveData] && eventos[chaveData].length > 0) {
             diaDiv.classList.add('has-event');
         }
@@ -75,9 +78,16 @@ function exibirEventosDoDia(data) {
     const chaveData = formatarDataParaChave(data);
 
     if (eventos[chaveData] && eventos[chaveData].length > 0) {
+        eventos[chaveData].sort((a, b) => {
+            if (!a.hora && !b.hora) return 0;
+            if (!a.hora) return 1;
+            if (!b.hora) return -1;
+            return a.hora.localeCompare(b.hora);
+        });
+
         eventos[chaveData].forEach((evento, index) => {
             const li = document.createElement('li');
-            li.textContent = evento;
+            li.textContent = `${evento.hora ? evento.hora + ' - ' : ''}${evento.nome}`;
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'X';
             deleteButton.classList.add('delete-event');
@@ -85,12 +95,12 @@ function exibirEventosDoDia(data) {
                 eventos[chaveData].splice(index, 1);
                 if (eventos[chaveData].length === 0) {
                     delete eventos[chaveData];
-                    const diaDiv = document.querySelector(`.dia-calendario[data-date="${chaveData}"]`); 
+                    const diaDiv = document.querySelector(`.dia-calendario[data-date="${chaveData}"]`);
                     if (diaDiv) diaDiv.classList.remove('has-event');
                 }
                 salvarEventos();
                 exibirEventosDoDia(data);
-                gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth()); 
+                gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
             };
             li.appendChild(deleteButton);
             listaEventos.appendChild(li);
@@ -105,17 +115,25 @@ function exibirEventosDoDia(data) {
 
 function adicionarEvento() {
     const inputEvento = document.getElementById('inputEvento');
+    const inputHora = document.getElementById('inputHoraEvento');
     const nomeEvento = inputEvento.value.trim();
+    const horaEvento = inputHora.value;
 
     if (nomeEvento && dataSelecionadaCalendario) {
         const chaveData = formatarDataParaChave(dataSelecionadaCalendario);
         if (!eventos[chaveData]) {
             eventos[chaveData] = [];
         }
-        eventos[chaveData].push(nomeEvento);
+
+        eventos[chaveData].push({
+            nome: nomeEvento,
+            hora: horaEvento
+        });
+
         salvarEventos();
         exibirEventosDoDia(dataSelecionadaCalendario);
         inputEvento.value = '';
+        inputHora.value = '';
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
     } else if (!nomeEvento) {
         alert('Por favor, digite o nome do evento.');
@@ -125,30 +143,57 @@ function adicionarEvento() {
 }
 
 function verificarNotificacoes() {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+    const agora = new Date();
+    const hojeChave = formatarDataParaChave(agora);
+    let notificacoesDisparadas = localStorage.getItem('notificacoesDisparadas') || '{}';
+    notificacoesDisparadas = JSON.parse(notificacoesDisparadas);
 
     for (const chaveData in eventos) {
-        const dataEvento = new Date(chaveData + 'T00:00:00');
-        dataEvento.setHours(0, 0, 0, 0);
+        const dataEventoObj = new Date(chaveData + 'T00:00:00');
+        dataEventoObj.setHours(0, 0, 0, 0);
 
-        const diffDias = Math.ceil((dataEvento.getTime() - hoje.getTime()) / UM_DIA_EM_MILISSEGUNDOS);
+        const diffDias = Math.ceil((dataEventoObj.getTime() - agora.setHours(0,0,0,0)) / UM_DIA_EM_MILISSEGUNDOS);
+        const agoraComHora = new Date();
 
         if (diffDias >= 0 && diffDias <= 7) {
-            const nomesEventos = eventos[chaveData].join(', ');
-            let mensagem = `Lembrete: O evento "${nomesEventos}" está `;
-            if (diffDias === 0) {
-                mensagem += `acontecendo HOJE!`;
-            } else if (diffDias === 1) {
-                mensagem += `amanhã!`;
-            } else {
-                mensagem += `em ${diffDias} dias!`;
-            }
-            alert(mensagem);
+            eventos[chaveData].forEach(evento => {
+                const eventoUnicoId = `${chaveData}-${evento.nome}-${evento.hora}`;
+
+                if (notificacoesDisparadas[eventoUnicoId]) {
+                    return;
+                }
+
+                let mensagem = `Lembrete: O evento "${evento.nome}" está `;
+
+                if (diffDias === 0) {
+                    if (evento.hora) {
+                        const [h, m] = evento.hora.split(':').map(Number);
+                        const dataComHoraEvento = new Date(agoraComHora.getFullYear(), agoraComHora.getMonth(), agoraComHora.getDate(), h, m, 0, 0);
+
+                        if (dataComHoraEvento.getTime() >= agoraComHora.getTime() - UM_MINUTO_EM_MILISSEGUNDOS * 5 && dataComHoraEvento.getTime() <= agoraComHora.getTime() + UM_MINUTO_EM_MILISSEGUNDOS * 15) {
+                            mensagem += `acontecendo AGORA ou em breve (${evento.hora})!`;
+                            alert(mensagem);
+                            notificacoesDisparadas[eventoUnicoId] = true;
+                        }
+                    } else {
+                        mensagem += `acontecendo HOJE!`;
+                        alert(mensagem);
+                        notificacoesDisparadas[eventoUnicoId] = true;
+                    }
+                } else if (diffDias === 1) {
+                    mensagem += `amanhã${evento.hora ? ' às ' + evento.hora : ''}!`;
+                    alert(mensagem);
+                    notificacoesDisparadas[eventoUnicoId] = true;
+                } else {
+                    mensagem += `em ${diffDias} dias${evento.hora ? ' às ' + evento.hora : ''}!`;
+                    alert(mensagem);
+                    notificacoesDisparadas[eventoUnicoId] = true;
+                }
+            });
         }
     }
+    localStorage.setItem('notificacoesDisparadas', JSON.stringify(notificacoesDisparadas));
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarEventos();
@@ -195,9 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     botaoCalendario.onclick = function() {
         modalCalendario.style.display = 'flex';
-        dataAtualCalendario = new Date(); 
+        dataAtualCalendario = new Date();
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        dataSelecionadaCalendario = new Date(); 
+        dataSelecionadaCalendario = new Date();
         const hojeDiv = document.querySelector(`.dia-calendario.hoje`);
         if (hojeDiv) {
             const diaAnteriorSelecionado = document.querySelector('.dia-calendario.selecionado');
@@ -222,13 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
     prevMonthBtn.onclick = () => {
         dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() - 1);
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        exibirEventosDoDia(dataSelecionadaCalendario); 
+        exibirEventosDoDia(dataSelecionadaCalendario);
     };
 
     nextMonthBtn.onclick = () => {
         dataAtualCalendario.setMonth(dataAtualCalendario.getMonth() + 1);
         gerarCalendario(dataAtualCalendario.getFullYear(), dataAtualCalendario.getMonth());
-        exibirEventosDoDia(dataSelecionadaCalendario); 
+        exibirEventosDoDia(dataSelecionadaCalendario);
     };
 
     adicionarEventoBtn.onclick = adicionarEvento;
@@ -238,116 +283,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function atualizarContadorPrincipal() {
-        const dataInicioNamoro = new Date('2023-09-09T00:00:00');
-        const dataDoisAnosNamoro = new Date('2025-09-09T00:00:00');
-        const dataDiaDosNamorados = new Date('2025-06-12T00:00:00');
-        const dataUmAnoAlianca = new Date('2025-06-15T00:00:00');
-        const dataAtual = new Date();
+    setInterval(verificarNotificacoes, UM_MINUTO_EM_MILISSEGUNDOS * 5);
+    setInterval(atualizarContadorPrincipal, 1000);
+});
 
-        const elementoMensagem = document.querySelector('.mensagem');
-        const elementoContador = document.getElementById('contador');
-        const coracoes = document.querySelectorAll('.coracao');
+function atualizarContadorPrincipal() {
+    const dataInicioNamoro = new Date('2023-09-09T00:00:00');
+    const dataDoisAnosNamoro = new Date('2025-09-09T00:00:00');
+    const dataDiaDosNamorados = new Date('2025-06-12T00:00:00');
+    const dataUmAnoAlianca = new Date('2025-06-15T00:00:00');
+    const dataAtual = new Date();
 
-        elementoContador.style.display = 'block';
+    const elementoMensagem = document.querySelector('.mensagem');
+    const elementoContador = document.getElementById('contador');
+    const coracoes = document.querySelectorAll('.coracao');
+
+    elementoContador.style.display = 'block';
+    elementoMensagem.classList.remove('animar-mensagem');
+    coracoes.forEach(coracao => {
+        coracao.style.opacity = 0;
+        coracao.innerHTML = '';
+    });
+
+    const fimDoContador = new Date(dataDoisAnosNamoro);
+    fimDoContador.setHours(23, 59, 59, 999);
+
+    if (dataAtual.getTime() > fimDoContador.getTime()) {
+        elementoContador.style.display = 'none';
+        elementoMensagem.textContent = 'Eu te amo!';
+        elementoMensagem.classList.add('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 1;
+            coracao.innerHTML = '💖';
+        });
+        return;
+    }
+
+    const diaNamoradosHoje = (dataAtual.getDate() === dataDiaDosNamorados.getDate() &&
+                             dataAtual.getMonth() === dataDiaDosNamorados.getMonth() &&
+                             dataAtual.getFullYear() === dataDiaDosNamorados.getFullYear());
+
+    if (diaNamoradosHoje) {
+        elementoMensagem.textContent = 'Feliz Dia dos Namorados! 💖';
+        elementoMensagem.classList.add('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 1;
+            coracao.innerHTML = '💖';
+        });
+        elementoContador.style.display = 'none';
+        return;
+    }
+
+    const diaAliancaHoje = (dataAtual.getDate() === dataUmAnoAlianca.getDate() &&
+                            dataAtual.getMonth() === dataUmAnoAlianca.getMonth() &&
+                            dataAtual.getFullYear() === dataUmAnoAlianca.getFullYear());
+
+    if (diaAliancaHoje) {
+        elementoMensagem.textContent = 'Feliz 1 Ano de Aliança! 💍';
+        elementoMensagem.classList.add('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 1;
+            coracao.innerHTML = '✨';
+        });
+        elementoContador.style.display = 'none';
+        return;
+    }
+
+    const diferencaInicioNamoro = dataAtual.getTime() - dataInicioNamoro.getTime();
+    const diferencaDoisAnosNamoro = dataDoisAnosNamoro.getTime() - dataAtual.getTime();
+
+    if (diferencaDoisAnosNamoro <= 0) {
+        elementoMensagem.textContent = 'Feliz 2 anos, meu amor! ✨';
+        elementoMensagem.classList.add('animar-mensagem');
+        coracoes.forEach(coracao => {
+            coracao.style.opacity = 1;
+            coracao.innerHTML = '💖';
+        });
+        elementoContador.style.display = 'none';
+    } else {
+        const diasRestantesNamoro = Math.ceil(diferencaDoisAnosNamoro / UM_DIA_EM_MILISSEGUNDOS);
+        elementoMensagem.textContent = `Faltam ${diasRestantesNamoro} dias para 2 anos!`;
         elementoMensagem.classList.remove('animar-mensagem');
         coracoes.forEach(coracao => {
             coracao.style.opacity = 0;
             coracao.innerHTML = '';
         });
-
-        const fimDoContador = new Date(dataDoisAnosNamoro);
-        fimDoContador.setHours(23, 59, 59, 999);
-
-        if (dataAtual.getTime() > fimDoContador.getTime()) {
-            elementoContador.style.display = 'none';
-            elementoMensagem.textContent = 'Eu te amo!';
-            elementoMensagem.classList.add('animar-mensagem');
-            coracoes.forEach(coracao => {
-                coracao.style.opacity = 1;
-                coracao.innerHTML = '💖';
-            });
-            return;
-        }
-
-        const diaNamoradosHoje = (dataAtual.getDate() === dataDiaDosNamorados.getDate() &&
-                                 dataAtual.getMonth() === dataDiaDosNamorados.getMonth() &&
-                                 dataAtual.getFullYear() === dataDiaDosNamorados.getFullYear());
-
-        if (diaNamoradosHoje) {
-            elementoMensagem.textContent = 'Feliz Dia dos Namorados! 💖';
-            elementoMensagem.classList.add('animar-mensagem');
-            coracoes.forEach(coracao => {
-                coracao.style.opacity = 1;
-                coracao.innerHTML = '💖';
-            });
-            elementoContador.style.display = 'none';
-            return;
-        }
-
-        const diaAliancaHoje = (dataAtual.getDate() === dataUmAnoAlianca.getDate() &&
-                                dataAtual.getMonth() === dataUmAnoAlianca.getMonth() &&
-                                dataAtual.getFullYear() === dataUmAnoAlianca.getFullYear());
-
-        if (diaAliancaHoje) {
-            elementoMensagem.textContent = 'Feliz 1 Ano de Aliança! 💍';
-            elementoMensagem.classList.add('animar-mensagem');
-            coracoes.forEach(coracao => {
-                coracao.style.opacity = 1;
-                coracao.innerHTML = '✨';
-            });
-            elementoContador.style.display = 'none';
-            return;
-        }
-
-        const diferencaInicioNamoro = dataAtual.getTime() - dataInicioNamoro.getTime();
-        const diferencaDoisAnosNamoro = dataDoisAnosNamoro.getTime() - dataAtual.getTime();
-
-        if (diferencaDoisAnosNamoro <= 0) {
-            elementoMensagem.textContent = 'Feliz 2 anos, meu amor! ✨';
-            elementoMensagem.classList.add('animar-mensagem');
-            coracoes.forEach(coracao => {
-                coracao.style.opacity = 1;
-                coracao.innerHTML = '💖';
-            });
-            elementoContador.style.display = 'none';
-        } else {
-            const diasRestantesNamoro = Math.ceil(diferencaDoisAnosNamoro / UM_DIA_EM_MILISSEGUNDOS);
-            elementoMensagem.textContent = `Faltam ${diasRestantesNamoro} dias para 2 anos!`;
-            elementoMensagem.classList.remove('animar-mensagem');
-            coracoes.forEach(coracao => {
-                coracao.style.opacity = 0;
-                coracao.innerHTML = '';
-            });
-            elementoContador.style.display = 'block';
-        }
-
-        const segundos = Math.floor((diferencaInicioNamoro / 1000) % 60);
-        const minutos = Math.floor((diferencaInicioNamoro / (1000 * 60)) % 60);
-        const horas = Math.floor((diferencaInicioNamoro / (1000 * 60 * 60)) % 24);
-
-        let diffAnos = dataAtual.getFullYear() - dataInicioNamoro.getFullYear();
-        let diffMeses = dataAtual.getMonth() - dataInicioNamoro.getMonth();
-        let diffDias = dataAtual.getDate() - dataInicioNamoro.getDate();
-
-        if (diffDias < 0) {
-            diffMeses--;
-            const ultimoDiaMesAnterior = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 0).getDate();
-            diffDias = ultimoDiaMesAnterior + diffDias;
-        }
-
-        if (diffMeses < 0) {
-            diffAnos--;
-            diffMeses = 12 + diffMeses;
-        }
-
-        document.getElementById('anos').textContent = diffAnos;
-        document.getElementById('meses').textContent = diffMeses;
-        document.getElementById('dias').textContent = diffDias;
-        document.getElementById('horas').textContent = horas;
-        document.getElementById('minutos').textContent = minutos;
-        document.getElementById('segundos').textContent = segundos;
+        elementoContador.style.display = 'block';
     }
 
-    setInterval(atualizarContadorPrincipal, 1000);
-});
+    const segundos = Math.floor((diferencaInicioNamoro / 1000) % 60);
+    const minutos = Math.floor((diferencaInicioNamoro / (1000 * 60)) % 60);
+    const horas = Math.floor((diferencaInicioNamoro / (1000 * 60 * 60)) % 24);
+
+    let diffAnos = dataAtual.getFullYear() - dataInicioNamoro.getFullYear();
+    let diffMeses = dataAtual.getMonth() - dataInicioNamoro.getMonth();
+    let diffDias = dataAtual.getDate() - dataInicioNamoro.getDate();
+
+    if (diffDias < 0) {
+        diffMeses--;
+        const ultimoDiaMesAnterior = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 0).getDate();
+        diffDias = ultimoDiaMesAnterior + diffDias;
+    }
+
+    if (diffMeses < 0) {
+        diffAnos--;
+        diffMeses = 12 + diffMeses;
+    }
+
+    document.getElementById('anos').textContent = diffAnos;
+    document.getElementById('meses').textContent = diffMeses;
+    document.getElementById('dias').textContent = diffDias;
+    document.getElementById('horas').textContent = horas;
+    document.getElementById('minutos').textContent = minutos;
+    document.getElementById('segundos').textContent = segundos;
+}
