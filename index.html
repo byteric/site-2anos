@@ -27,11 +27,36 @@
         <button id="botaoCartaPrincipal">Nossa Carta Especial ❤️</button>
         <button id="botaoCartaNamorados">Dia dos Namorados 💖</button>
         <button id="botaoCartaAlianca">1 Ano de Aliança 💍</button>
-        <div class="coracao" style="right: 15%; bottom: 15%;"></div>
+        <button id="botaoCalendario">Calendário de Datas ✨</button> <div class="coracao" style="right: 15%; bottom: 15%;"></div>
         <div class="coracao" style="left: 45%; top: 5%;"></div>
         <div class="coracao" style="right: 5%; top: 60%;"></div>
     </div>
+
+    <div id="modalCalendario" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="fecharModalCalendario">&times;</span>
+            <h3>Nosso Calendário de Datas Especiais</h3>
+            <div class="calendario-header">
+                <button id="prevMonth">&lt;</button>
+                <h4 id="currentMonthYear"></h4>
+                <button id="nextMonth">&gt;</button>
+            </div>
+            <div class="dias-semana">
+                <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+            </div>
+            <div class="calendario-grid" id="calendarioGrid">
+                </div>
+            <div class="eventos-section">
+                <h4>Eventos do Dia Selecionado: <span id="dataEventoSelecionado"></span></h4>
+                <ul id="listaEventos">
+                    <p class="no-events">Nenhum evento para este dia.</p>
+                </ul>
+                <input type="text" id="inputEvento" placeholder="Nome do evento">
+                <button id="adicionarEvento">Adicionar Evento</button>
+            </div>
+        </div>
+    </div>
+
     <script src="scripts/script.js"></script>
-    <p></p>
 </body>
 </html>
